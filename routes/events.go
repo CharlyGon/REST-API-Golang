@@ -52,3 +52,32 @@ func createEvent(context *gin.Context) {
 
 	context.JSON(200, gin.H{"message": "Event was created successfully.", "event": event})
 }
+
+func updateEvent(context *gin.Context) {
+	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(400, gin.H{"message": "Invalid event ID."})
+		return
+	}
+
+	_, err = models.GetEventById(eventId)
+	if err != nil {
+		context.JSON(500, gin.H{"message": "Could not get event."})
+		return
+	}
+
+	var updatedEvent models.Event
+	err = context.ShouldBindJSON(&updatedEvent)
+	if err != nil {
+		context.JSON(400, gin.H{"message": "Could not parse request. Check your data and try again."})
+		return
+	}
+
+	updatedEvent.ID = eventId
+	err = updatedEvent.Update()
+	if err != nil {
+		context.JSON(500, gin.H{"message": "Could not update event."})
+		return
+	}
+	context.JSON(200, gin.H{"message": "Event was updated successfully.", "event": updatedEvent})
+}
