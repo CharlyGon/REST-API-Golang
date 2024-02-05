@@ -16,16 +16,20 @@ func getEvents(context *gin.Context) {
 	context.JSON(200, events)
 }
 
+const invalidEventIDMessage = "Invalid event ID."
+
+const fetchEventErrorMessage = "Could not fetch event."
+
 func getEvent(context *gin.Context) {
 	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
-		context.JSON(400, gin.H{"message": "Invalid event ID."})
+		context.JSON(400, gin.H{"message": invalidEventIDMessage})
 		return
 	}
 
 	event, err := models.GetEventById(eventId)
 	if err != nil {
-		context.JSON(500, gin.H{"message": "Could not get event."})
+		context.JSON(500, gin.H{"message": fetchEventErrorMessage})
 		return
 	}
 
@@ -56,13 +60,13 @@ func createEvent(context *gin.Context) {
 func updateEvent(context *gin.Context) {
 	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
 	if err != nil {
-		context.JSON(400, gin.H{"message": "Invalid event ID."})
+		context.JSON(400, gin.H{"message": invalidEventIDMessage})
 		return
 	}
 
 	_, err = models.GetEventById(eventId)
 	if err != nil {
-		context.JSON(500, gin.H{"message": "Could not get event."})
+		context.JSON(500, gin.H{"message": fetchEventErrorMessage})
 		return
 	}
 
@@ -80,4 +84,26 @@ func updateEvent(context *gin.Context) {
 		return
 	}
 	context.JSON(200, gin.H{"message": "Event was updated successfully.", "event": updatedEvent})
+}
+
+func deleteEvent(context *gin.Context) {
+	eventId, err := strconv.ParseInt(context.Param("id"), 10, 64)
+	if err != nil {
+		context.JSON(400, gin.H{"message": invalidEventIDMessage})
+		return
+	}
+
+	event, err := models.GetEventById(eventId)
+	if err != nil {
+		context.JSON(500, gin.H{"message": fetchEventErrorMessage})
+		return
+	}
+
+	err = event.Delete()
+	if err != nil {
+		context.JSON(500, gin.H{"message": "Could not delete event."})
+		return
+	}
+
+	context.JSON(200, gin.H{"message": "Event was deleted successfully."})
 }
