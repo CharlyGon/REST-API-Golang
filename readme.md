@@ -1,4 +1,4 @@
-# README.md - API REST con Go
+# API REST con Go
 
 ## Descripción
 
