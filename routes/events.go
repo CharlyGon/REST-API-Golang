@@ -1,9 +1,9 @@
 package routes
 
 import (
+	"strconv"
 	"example.com/rest-api/models"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 func getEvents(context *gin.Context) {
@@ -38,6 +38,7 @@ func getEvent(context *gin.Context) {
 
 func createEvent(context *gin.Context) {
 	var event models.Event
+
 	err := context.ShouldBindJSON(&event)
 
 	if err != nil {
@@ -45,8 +46,8 @@ func createEvent(context *gin.Context) {
 		return
 	}
 
-	event.ID = 1
-	event.UserID = 1
+	userId := context.GetInt64("userID")
+	event.UserID = userId
 
 	err = event.Save()
 	if err != nil {
@@ -64,9 +65,15 @@ func updateEvent(context *gin.Context) {
 		return
 	}
 
-	_, err = models.GetEventById(eventId)
+	userID := context.GetInt64("userID")
+	event, err := models.GetEventById(eventId)
 	if err != nil {
 		context.JSON(500, gin.H{"message": fetchEventErrorMessage})
+		return
+	}
+
+	if event.UserID != userID {
+		context.JSON(403, gin.H{"message": "You are not authorized to update this event."})
 		return
 	}
 

@@ -79,12 +79,18 @@ POST /signup
 
 ```plaintext
 .
+├── middleware
+│   ├── auth.go
+├── utils
+│   ├── hash.go
+|   └── jwt.go
 ├── models
 │   ├── event.go
 |   └── user.go
 ├── db
 │   └── db.go
 ├── routes
+|   ├── register.go
 │   ├── routes.go
 |   ├── events.go
 |   └── users.go
